@@ -1,0 +1,21 @@
+name: Basic checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-basic:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -B tests/provider_smoke.py
+      - run: python -B tests/repository_smoke.py
+      - run: python -B scripts/build_release.py --destination dist

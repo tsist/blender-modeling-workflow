@@ -1,0 +1,2 @@
+# Runtime identities hash exact bytes; do not rewrite line endings on checkout.
+* -text

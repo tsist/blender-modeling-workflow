@@ -1,0 +1,13 @@
+schema_version = "1.0.0"
+id = "modeling_workflow"
+version = "0.1.13"
+name = "Modeling Workflow"
+tagline = "Review generated models and adopt editable native candidates"
+maintainer = "Blender AI"
+type = "add-on"
+tags = ["Object", "Import-Export"]
+blender_version_min = "5.2.0"
+license = ["SPDX:GPL-3.0-or-later"]
+
+[permissions]
+files = "Read reports and adopt verified candidates into a new scene"
