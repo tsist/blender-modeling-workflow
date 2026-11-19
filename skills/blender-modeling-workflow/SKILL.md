@@ -21,9 +21,9 @@ description: 组织外部模型生成与 Blender 建模交接，从参考多视�
 
 ## 执行环境
 
-配套 CLI 发行版为 0.1.13，要求已有 Python 3.12+。将 `BLENDERCTL_ROOT` 指向本仓库根，直接入口为 `tools/blenderctl/cli.py`；根 `blenderctl.ps1` 支持 `BLENDERCTL_PYTHON` 指定 Python。Python、Blender、输入和作业目录使用用户环境中已确认的绝对路径，不假定盘符、用户名或捆绑运行时。全局 `--blender`、独立 `--jobs-dir` 放在子命令前；本发行没有通用事务入口，不依赖 BLENDER_PATH。先核对当前 `modeling describe`、帮助、Schema 和 `implementation_sha256`，版本号本身不能证明合同匹配。
+配套 CLI 发行版为 0.1.14，要求已有 Python 3.12+。将 `BLENDERCTL_ROOT` 指向本仓库根，直接入口为 `tools/blenderctl/cli.py`；根 `blenderctl.ps1` 支持 `BLENDERCTL_PYTHON` 指定 Python。Python、Blender、输入和作业目录使用用户环境中已确认的绝对路径，不假定盘符、用户名或捆绑运行时。全局 `--blender`、独立 `--jobs-dir` 放在子命令前；本发行没有通用事务入口，不依赖 BLENDER_PATH。先核对当前 `modeling describe`、帮助、Schema 和 `implementation_sha256`，版本号本身不能证明合同匹配。
 
-本地交接目标为 Windows / Blender 5.2.x，现有实际案例集中于 5.2.1；不据此保证其他版本或跨平台通过。本技能可以独立分发，但不包含 CLI、Blender、账号或图像/材质工具。专项技能缺失时说明所需外部能力，使用已存在且可核对的工具；不伪造入口或自动安装。绑定与动画需要额外专项工具和验收。
+本地交接目标为 Windows / Blender 5.2.1 LTS 或 5.3.0，依据本地静态候选的实机验证。本技能可以独立分发，但不包含 CLI、Blender、账号或图像/材质工具。专项技能缺失时说明所需外部能力，使用已存在且可核对的工具；不伪造入口或自动安装。绑定与动画需要额外专项工具和验收。
 
 每个候选保留文件/SHA、来源、操作与父候选关系，原件与制作副本分开。远程 task_id、本地 job_id、候选身份和文件 SHA 不互相替代。报告用于导航，实际模型、解码图像和独立重开决定验收。
 

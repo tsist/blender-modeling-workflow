@@ -4,6 +4,6 @@
 
 软件与技能按 GPL-3.0-or-later 分发，完整文本见根目录及产品包内 LICENSE。公共 blenderctl 的 LICENSE 已核对为 GPLv3。该来源说明不表示公共仓库的旧版本包含本次所有新增功能；应使用本仓匹配源码和当前 describe 输出。
 
-运行时使用现有 Python 3.12+ 的标准库；本地候选交接使用用户已有的 Blender 5.2.x 及其 bpy/mathutils。Windows 文件锁与进程管理调用系统 API。本仓不下载或捆绑 Python、Blender、第三方 SDK 或生成模型。
+运行时使用现有 Python 3.12+ 的标准库。本地候选交接使用用户已有的 Blender 5.2.1 LTS 或 5.3.0 及其 bpy/mathutils。Windows 文件锁与进程管理调用系统 API。
 
 Tripo 与 Meshy 是可选网络服务。它们的账号、配额、价格、条款、输入外发与输出权利由使用者自行确认；软件许可证不提供服务访问许可，也不授予参考图或生成资产权利。

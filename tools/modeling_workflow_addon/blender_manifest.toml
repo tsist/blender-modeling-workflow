@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "modeling_workflow"
-version = "0.1.13"
+version = "0.1.14"
 name = "Modeling Workflow"
 tagline = "Review generated models and adopt editable native candidates"
 maintainer = "Blender AI"

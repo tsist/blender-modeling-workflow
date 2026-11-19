@@ -4,7 +4,7 @@
 
 ## 定位与发现
 
-先把BLENDERCTL_ROOT设为仓库根，BLENDERCTL_PYTHON设为已有Python3.12+的绝对路径；另以用户已安装Blender设置`$modelingBlender`，为本次发现设置独立绝对`$modelingDiscoveryJobsDir`。本发行CLI为0.1.13；本地交接目标Windows/Blender5.2.x，已有实证集中5.2.1，其他平台/版本未据此通过。
+先把BLENDERCTL_ROOT设为仓库根，BLENDERCTL_PYTHON设为已有Python3.12+的绝对路径；另以用户已安装Blender设置`$modelingBlender`，为本次发现设置独立绝对`$modelingDiscoveryJobsDir`。本发行CLI为0.1.14；本地交接目标Windows / Blender 5.2.1 LTS 或 5.3.0。
 
 ```powershell
 $ErrorActionPreference = 'Stop'

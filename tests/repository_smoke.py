@@ -28,7 +28,7 @@ def main():
     def invoke(*args):
         return subprocess.run([sys.executable,'-B',str(ROOT/'scripts/modeling_workflow.py'),*args],
                               capture_output=True,text=True,encoding='utf8',timeout=20)
-    version=invoke('--version');check('portable entry version',version.returncode==0 and version.stdout.strip()=='0.1.13')
+    version=invoke('--version');check('portable entry version',version.returncode==0 and version.stdout.strip()=='0.1.14')
     process=invoke('modeling','describe');description=json.loads(process.stdout)
     check('standalone discovery',process.returncode==0 and description['implementation_sha256']==implementation_sha256())
     check('all providers explicit',set(row['provider'] for row in description['provider_catalog']['providers'])=={'tripo-cn','tripo-overseas','meshy'})

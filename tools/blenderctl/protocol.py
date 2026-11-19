@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 import uuid
 
-VERSION = '0.1.13'
+VERSION = '0.1.14'
 SCHEMA = '1.0'
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BLENDER = ROOT / 'blender.exe'

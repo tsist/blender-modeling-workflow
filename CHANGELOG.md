@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.14 — Blender 5.3 兼容
+
+- 在 Windows 上实测 Blender 5.3.0 与 5.2.1 LTS 的扩展安装、本地 GLB 导入、双视角渲染、显式采用和独立重开。
+
 ## 0.1.13 — 独立仓库发行
 
 - 新增显式 `tripo-overseas` 基础适配器：manifest 1.1 的 submit/query/account_balance/download。

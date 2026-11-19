@@ -2,9 +2,9 @@
 
 ## 两种组件
 
-从本仓 Release 下载 `modeling-workflow-addon-0.1.13.zip`，通过 Blender Preferences → Get Extensions → Install from Disk 安装并启用。在3D View侧栏的 Modeling Workflow 面板选择已验候选报告，读取后显式采用到新场景，再另存 `.blend`。面板不上传图像或提交云任务。不要打开未保存工作的另一个文件来检查插件。
+从本仓 Release 下载 `modeling-workflow-addon-0.1.14.zip`，通过 Blender Preferences → Get Extensions → Install from Disk 安装并启用。在3D View侧栏的 Modeling Workflow 面板选择已验候选报告，读取后显式采用到新场景，再另存 `.blend`。面板不上传图像或提交云任务。不要打开未保存工作的另一个文件来检查插件。
 
-云动作与后台本地导入使用源码包中的 CLI。解压 `blender-modeling-workflow-0.1.13-source.zip` 或 clone 本仓后即可运行，无需母项目、submodule 或 pip 依赖。当前执行支持 Windows；需要已有 Python3.12+。本地导入另需已有 Blender5.2.x，并显式提供二进制路径。本轮基础发行验证没有启动 Blender。
+云动作与后台本地导入使用源码包中的 CLI。解压 `blender-modeling-workflow-0.1.14-source.zip` 或 clone 本仓后即可运行，无需母项目、submodule 或 pip 依赖。当前执行支持 Windows；需要已有 Python3.12+。本地导入已验证 Blender 5.2.1 LTS 与 5.3.0，执行时显式提供二进制路径。
 
 ```powershell
 $env:BLENDERCTL_PYTHON = '<已有Python的绝对路径>'
@@ -17,7 +17,7 @@ $env:BLENDERCTL_PYTHON = '<已有Python的绝对路径>'
 
 ## 技能
 
-把 `blender-modeling-workflow-skill-0.1.13.zip` 解压到代理实际使用的技能根，确保结果是 `blender-modeling-workflow/SKILL.md` 与同目录 references。源码提供一个显式安装器：
+把 `blender-modeling-workflow-skill-0.1.14.zip` 解压到代理实际使用的技能根，确保结果是 `blender-modeling-workflow/SKILL.md` 与同目录 references。源码提供一个显式安装器：
 
 ```powershell
 & $env:BLENDERCTL_PYTHON -B scripts/install_skill.py --destination '<代理技能根绝对路径>'

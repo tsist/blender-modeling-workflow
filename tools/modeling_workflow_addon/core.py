@@ -13,7 +13,7 @@ import struct
 import bpy
 from mathutils import Vector
 
-VERSION = '0.1.13'
+VERSION = '0.1.14'
 OWNER = 'modeling_workflow_v1'
 
 

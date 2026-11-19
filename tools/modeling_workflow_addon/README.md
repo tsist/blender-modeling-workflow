@@ -1,4 +1,4 @@
-# Modeling Workflow 0.1.13
+# Modeling Workflow 0.1.14
 
 Blender 本地候选审阅插件，配套 `blender-modeling-workflow` 技能与源码 CLI。插件读取候选报告、核对文件 SHA 和技术检查结果，并将确认后的候选复制到新场景。面板不保存凭据，不直接调用云生成，不自动替换原场景或保存工程。
 
@@ -6,7 +6,7 @@ Blender 本地候选审阅插件，配套 `blender-modeling-workflow` 技能与�
 
 ## 安装与使用
 
-1. 准备 Blender 5.2 或更高版本；历史已验环境为 Windows / Blender 5.2.1 LTS。其他版本和平台须单独验证。
+1. 准备 Windows 上的 Blender 5.2.1 LTS 或 5.3.0。其他版本和平台须单独验证。
 2. 在 Blender 的 Preferences → Get Extensions → Install from Disk 选择插件 ZIP，并启用 Modeling Workflow。不要将源码仓库 ZIP 当成插件安装包。
 3. 在 3D View 按 N，打开 Modeling Workflow 面板，选择匹配的 `modeling-report.json`，点击“读取并核对候选”。报告须指向持久保存且已检查的候选；普通 GLB 不直接作为候选报告读取。
 4. 在 Object Mode 点击“采用到新场景”。插件追加并切换到候选场景；原场景保留。查看结果后用 Blender 原生 Save As 另存新工程。
