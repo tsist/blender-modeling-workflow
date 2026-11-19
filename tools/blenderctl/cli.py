@@ -16,7 +16,7 @@ class Parser(argparse.ArgumentParser):
 
 
 def parser():
-    value = Parser(description='Standalone Blender Modeling Workflow CLI; Windows execution')
+    value = Parser(description='Standalone Blender Modeling Workflow CLI; Windows execution / Linux synchronous local GLB import')
     value.add_argument('--version', action='version', version=VERSION)
     value.add_argument('--blender', type=Path, default=DEFAULT_BLENDER)
     value.add_argument('--jobs-dir', type=Path, default=DEFAULT_JOBS)
@@ -74,11 +74,15 @@ def main(argv=None):
         else:
             request = (read_json(args.file) if args.command == 'request' else
                        {'schema_version': SCHEMA, 'command': 'modeling.run', 'params': read_json(args.params)})
-            job = runner.prepare(request, args.blender, args.jobs_dir, args.timeout)
-            if args.background:
-                result = runner.submit(job)
+            if sys.platform == 'linux':
+                from linux_local import local_run
+                result, code = local_run(request, args.blender, args.jobs_dir, args.timeout, args.background)
             else:
-                result, code = runner.execute(job)
+                job = runner.prepare(request, args.blender, args.jobs_dir, args.timeout)
+                if args.background:
+                    result = runner.submit(job)
+                else:
+                    result, code = runner.execute(job)
     except Failure as exc:
         result = envelope(error={'code': exc.code, 'message': str(exc)})
         code = CODES.get(exc.code, CODES['WORKER_FAILED'])

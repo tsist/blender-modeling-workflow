@@ -19,3 +19,14 @@ jobs:
       - run: python -B tests/provider_smoke.py
       - run: python -B tests/repository_smoke.py
       - run: python -B scripts/build_release.py --destination dist
+
+  linux-local:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      # Host guards only; no Blender/provider download or integration claim.
+      - run: python -B tests/linux_local_smoke.py
+      - run: python -B tests/repository_smoke.py
