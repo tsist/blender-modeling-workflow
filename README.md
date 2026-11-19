@@ -17,7 +17,7 @@
 
 ## 使用前
 
-源码包包含匹配的建模专用 CLI。执行支持 Windows 和 Python 3.12+。本地交接已验证 Blender 5.2.1 LTS 与 5.3.0，运行时由用户提供。
+源码包包含匹配的建模专用 CLI。完整执行支持 Windows 和 Python 3.12+。Linux 新增同步、本地静态 GLB 导入与独立重开验证；不支持供应商与后台任务。用法及保护边界见 [Linux 本地导入](docs/LINUX.md)。本地交接已验证 Blender 5.2.1 LTS 与 5.3.0，运行时由用户提供。
 
 ```powershell
 python -B scripts/modeling_workflow.py --version

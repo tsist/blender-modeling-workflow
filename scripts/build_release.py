@@ -18,14 +18,14 @@ SKILL = ('LICENSE','SKILL.md','references/blender-handoff.md','references/bounde
          'references/brief-and-reference.md','references/delivery-and-review.md',
          'references/generate-and-compare.md','references/material-cooperation.md',
          'references/parts-and-completion.md','references/provider-and-budget.md','references/recovery.md')
-CLI = ('cli.py','protocol.py','runner.py','worker.py','modeling_identity.py','filesystem.py','processes.py',
+CLI = ('cli.py','linux_local.py','protocol.py','runner.py','worker.py','modeling_identity.py','filesystem.py','processes.py',
        'bootstrap.py','timing.py','modeling_interface.py','modeling_workflow_contract.py',
        'modeling_host.py','modeling_workflow.py','modeling_verifier.py')
 SUPPORT = ('.gitattributes','.gitignore','.github/workflows/basic.yml','LICENSE','README.md','CHANGELOG.md',
            'THIRD_PARTY_NOTICES.md','blenderctl.ps1','docs/CAPABILITIES.md','docs/SECURITY.md',
            'docs/INSTALL.md','docs/VERIFICATION.md','scripts/modeling_workflow.py',
            'scripts/install_skill.py','scripts/build_release.py','tests/provider_smoke.py',
-           'tests/repository_smoke.py')
+           'tests/repository_smoke.py','tests/linux_local_smoke.py','docs/LINUX.md')
 
 def sha(data):return hashlib.sha256(data).hexdigest()
 
@@ -76,7 +76,7 @@ def build(destination):
     if any(path.read_bytes()!=raw for path,raw in sources.items()):
         raise ValueError('Source changed during packaging; do not publish these artifacts')
     result={'version':version,'license':'GPL-3.0-or-later','packages':packages,
-            'scope':'Windows modeling CLI, Blender add-on and one companion skill; no credentials, jobs, models or runtime binaries'}
+            'scope':'Windows modeling CLI / synchronous Linux local import, Blender add-on and one companion skill; no credentials, jobs, models or runtime binaries'}
     manifest=destination/'release-manifest.json';manifest.write_text(json.dumps(result,indent=2)+'\n',encoding='utf8')
     sums=[(p['file'],p['sha256']) for p in packages]+[(manifest.name,sha(manifest.read_bytes()))]
     (destination/'SHA256SUMS.txt').write_text(''.join(f'{checksum}  {name}\n' for name,checksum in sorted(sums)),encoding='utf8')
