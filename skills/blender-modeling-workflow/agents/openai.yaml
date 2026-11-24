@@ -1,0 +1,7 @@
+interface:
+  display_name: "Blender 外部生成候选整合"
+  short_description: "导入外部生成三维候选为原生 .blend，做同条件比较、部件分流沿用或重建，并处理中国站 H3.1 生成与恢复"
+  default_prompt: "用 blenderctl 导入并审查外部生成候选，同条件比较后按部件决定直接沿用或转交硬表面重建，并整理成可交给审核、UV 与材质的工作副本。"
+policy:
+  allow_implicit_invocation: true
+  default_prompt: "Use $blender-modeling-workflow for this Blender workflow task."

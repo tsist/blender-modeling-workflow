@@ -1,62 +1,77 @@
-# 恢复已有任务
+# 中断作业恢复、断点续传与限流处理
 
-先读取原 request/job/report、候选/SHA、task_id、原账与下载状态，判断停在提交前、未知提交、远端运行、下载或本地制作。恢复不等于新增收费；accepted task 不再 POST。仅取消本任务拥有的本地作业，本地取消不证明云取消或退款。
+遇到网络抖动、超时、限流、下载断片或提交状态不明时，先查已有回执、原账和本地文件，把当前所处阶段摸清楚再动手。恢复优先复用已经生成的产物和原预约，避免重复扣费。
 
-| 证据 | 下一动作 | 停止条件 |
-| --- | --- | --- |
-| 有效本地 GLB/贴图 | 核对 SHA 后[本地交接](blender-handoff.md) | 损坏或来源不明时不重新收费 |
-| `.blend` 和报告 | 重开并继续受影响制作 | 文件变化重新取证，不覆盖手改 |
-| 已知 task_id | 同 task query，再按状态 download | 失败保留同 task，不重 submit |
-| 未知 submit | 核查原账/受理证据，仅支持的中国站合同可 bind | 无证据保持 unknown 与预约 |
-| partial/checkpoint | 确认原 worker 停止后按支持合同恢复 | 身份、SHA、长度或 validator 不符就停止 |
-| 本地 job 运行 | 同 jobs-dir status/result 或一次有界 wait | queued/running 不认定成功，不循环轮询 |
+## 第一步：按现场证据选下一步动作
 
-使用已定位的 `$modelingCli` 和原作业目录：
+先收集已有 `request`、作业目录日志、`modeling-report.json`、原账 `ledger_file`、本地文件与 SHA256，对照下表直接进入对应动作：
+
+| 手头证据 | 立刻做什么 | 停下来核查的信号 |
+|---|---|---|
+| 已有完整本地 GLB 或 FBX | 算 SHA256，直接进 [本地导入](blender-handoff.md) | 文件损坏或来源不明，先回查原下载回执 |
+| 已有候选 `.blend` 与报告 | 新进程冷重开候选，继续整理 | 文件 SHA 变动，先重新体检再改 |
+| 本地作业仍在跑 | 用原 `--jobs-dir` 和 `job_id` 查状态或有界等待 | 仍在运行就等本次等待返回，先做其他独立环节 |
+| 已知远端 `task_id` | 对原 `task_id` 跑 `query`，成功后再 `download` | 远端显示失败就保留原任务记录并调整方案 |
+| 提交超时、无 `task_id` | 查原请求、原账与控制台/受理回执，核实后走 `bind_unknown` 或 `resume_pre_submit` | 尚无确凿证据时保留 `unknown` 预约，先取证 |
+| 下载写到一半中断 | 确认旧作业已停，查残片和检查点文件，新作业跑 `resume_download` | 长度、强 ETag 或资源路径变动，改按新完整下载或汇报 |
+
+## 查询与等待已有本地作业
+
+查询已有作业时，沿用提交时的发行开关、原 `--jobs-dir` 和原 `job_id`。本地 `job_id` 管本地作业状态，远端 `task_id` 管云端任务状态，两者分开查。
 
 ```powershell
-& $modelingCli --jobs-dir $modelingOriginalJobsDir job status $modelingJobId
-& $modelingCli --jobs-dir $modelingOriginalJobsDir job result $modelingJobId
-& $modelingCli --jobs-dir $modelingOriginalJobsDir job wait $modelingJobId --wait-seconds 30
+$ctl = './blenderctl.ps1'
+
+& $ctl --modeling-release 0.1.14 --jobs-dir $origJobsDir job status $jobId
+& $ctl --modeling-release 0.1.14 --jobs-dir $origJobsDir job wait $jobId --wait-seconds 30
+& $ctl --modeling-release 0.1.14 --jobs-dir $origJobsDir job result $jobId
 ```
 
-本地 job 与远程 task 分别判终态；CLI job_id 不传远程 API。query 可能写观察/结算记录，不把带账 query 一概视作无副作用。
+拿到终态后先看退出码和 `ok`，再顺着 `artifacts` 和 `modeling-report.json` 找产物路径或错误诊断。
 
-## 海外恢复边界
+## 查询已知任务与批量查询
 
-海外仅 manifest1.1/tripo-overseas 的 submit/query/account_balance/download。独立 global 凭据 scope、账、批准和请求 SHA 域不接受中国站或研究账。上传失败、未知 POST 或终态费用缺失保留预约/次数，不清账、不推定零费用或自动重试。已知 task 可显式单次 query；未知提交本版无 bind/resume/migration 路径。
+- **单个已知任务**：先查 `modeling describe --operation query --schema`，用原 `ledger_file`、`credential_ref` 和 `task_id` 查询最新状态与结算回执。
+- **多个已知任务（`query_batch`）**：单批放 `1–16` 个唯一 `task_id`，顺序每项查一次 GET。遇远端运行中或失败会记下快照继续查下一项；遇网络错误、限流或超时会停批并把未查项写进 `query-batch.json` 的 `remaining_task_ids`。旧作业停稳后，新作业只放 `remaining_task_ids` 接着查。
 
-download 内取同 task 当前 URL，只作新鲜完整 GLB，显式给 max_download_bytes；不续接中国站 checkpoint，无自动 retry、跨区 fallback 或 batch。20 credits为公开估价，非硬扣费保证。本次发行只做基础模拟及一次真实余额 GET，无海外模型生成、真实扣费或新增 Blender/建模验收。完整范围见[提供商与预算](provider-and-budget.md#海外基础接口)。
+## 下载断点续传与链接刷新
 
-## 原图上传
+### 断点续传（`resume_download`）
 
-Tripo 使用同地区官方 files/presign 小 JSON 申请，再以独立无 Bearer HTTPS PUT 发送原 PNG。固定16KiB块、30秒空闲及180秒单图总时限；完整发送并获存储HTTP200才返回token。记录输入 SHA、完整字节数及安全回执，本地写入量不证明服务端收件量。签名 URL/token 不落日志，不降图或自动回退重传。
+1. 先确认原下载作业已到达终态（或原进程已退出），保护磁盘上的残片（`partial`）和同目录检查点（`checkpoint`）原样不动。
+2. 先查 `modeling describe --operation resume_download --schema`，在新作业目录构造 manifest，传入同一 `task_id`、`credential_ref`、原 `ledger_file`，以及 `recovery_descriptor` 和 `partial_descriptor` 的真实绝对路径与 SHA256。
+3. 作业会校验残片 SHA、检查点已确认前缀 SHA、文件总长度、HTTPS 来源路径摘要和强 ETag，向当前下载链接请求剩余字节（HTTP 206 `Content-Range`），并把已确认前缀复制到新目录拼接，完整通过 GLB 校验后才晋升输出。
+4. 若检查点显示全部字节已落盘且尚未晋升，作业会直接在本地校验并晋升为完整 GLB，省去网络重下。为整作业预留包含本地校验与大文件复制在内的充足超时时间。
 
-外层公共 job timeout 覆盖全部上传及后续API，两图上传上限合计360秒，另留API时间。上传成功不证明生成受理、费用结算或模型质量，也不能释放旧预约。
+### 下载链接失效或访问被拒
 
-## 中国站提交前单次恢复
+模型下载返回 HTTP 401/403/404/410 时，CLI 报 `ARTIFACT_UNAVAILABLE`（退出码 `13`）。确认旧作业已停后：
 
-仅 manifest1.1、显式tripo-cn，先发现 resume_pre_submit 和 pre_submit_recovery_statement Schema。适用于未认领 reserved、无task_id 的原预约；必须有对应的一次恢复授权，并有据核实原job/owner停止、generation POST从未开始。reserved、tasknull、耗时或缺日志均不足以证明未POST。证据不足或已有submitting/unknown/confirmed时停止该路径。
+- **没有可用残片**：新建一个同一 `task_id` 的 `download` 作业，由工具内部重新拉取当前有效下载链接并完整下载。
+- **已有完整残片和检查点**：新建 `resume_download` 作业，工具同样会先取当前链接再核对来源路径、强 ETag 和区间长度续传。
+- **远端明确回报 `expired`**：停止刷新链接，检查本地已有副本或核实平台保留期限，再决定是否另起方案。
 
-声明绑定原账当前SHA、原approval/attempt/operation/request、图像SHA、旧实现身份及核实证据。普通ledger1.0用声明schema1.0；ledger1.2必须声明schema1.1及 ledger_schema_version:"1.2"，验证完整backup/增量授权/request/派生approval四份根证据和全部旧有序前缀，只允许唯一新增未认领reserved行。原派生approval保持原路径/SHA，全部旧冻结记录不能套普通写账query或bind。
+## 有据绑定未知提交（`bind_unknown`）
 
-沿用同路径/attempt/预约/次数，只认领一次，不新reserve；原请求、批准和证据持有到云请求结束，mutable ledger由模块CAS。认领前本地核查/余额GET不创建attempt；认领后上传失败、取消或POST未知均保unknown/保守submitting及原预约，禁止第二次恢复和财务回滚。受理task先写acceptance回执再确认原账，失败时核对 pre_submit_recovery.accepted_task_id、acceptance_receipt_persisted 和真实文件/SHA；布尔值不能单独证明持久文件或授权绑定。
+当收费提交因超时进入 `unknown`、本地账本缺少 `task_id`，但你在服务商控制台或找回的受理回执里确认到了对应任务，用 `bind_unknown` 把真实 `task_id` 挂回原预约，零额外扣费、零重复 POST。
 
-## 中国站有据绑定未知提交
+1. 先查 `modeling describe --operation bind_unknown --schema` 和 `--operation binding_statement --schema`。
+2. 准备绑定声明（`binding_statement`）：填入原批准 SHA256、当前账本 SHA256、`attempt_id`、`operation_id`、`operation`、`request_sha256`、已核实的 `task_id`，以及来源为 `provider_console` 或 `recovered_acceptance_receipt` 的本地证据文件描述符。
+3. 提交 `bind_unknown`：工具校对身份与预算后，发一次 GET 验证任务匹配，把原账尝试更新为 `confirmed` 并保留原预约。随后按 `followup_query_required` 跑一次 `query` 完成终态费用结算。
 
-发现 bind_unknown/binding_statement Schema后，使用原账、原规范request与binding_descriptor，不新attempt或上传。声明绑定原批准/当前账SHA、attempt/operation/request身份和经核实task；验证来源须为控制台或找回受理回执及对应本地证据，不按类型、时间、消费猜映射。
+## 提交前上传失败的单次恢复（`resume_pre_submit`）
 
-仅一次GET核对task/操作，然后按账SHA更新映射，预约/次数保持。accounting_deferred/followup_query_required表示仍需后续query结算；缺费用不释放。此合同不自动找回未知POST，也不承诺真实云幂等、取消或退款。
+中国站原图上传采用 `/files/presign` 预签名加 16 KiB 分块 PUT（单图 30 秒空闲、180 秒总时限）；提交两张图时，外层公共作业超时要覆盖全部上传时间（两图留足 360 秒以上）外加后续 API 调用时间。
 
-## 中国站下载检查点
+如果作业在原图上传阶段中断，且已核实旧作业进程已停、生成 POST 尚未发出、原账尝试仍处于 `reserved` 且无 `task_id`，可按批准执行一次提交前恢复：
 
-确认原worker终态或有据owner退出，保留原partial/checkpoint。resume_download使用同task/credential/原账及真实recovery_descriptor/partial_descriptor路径和SHA，新job写新目录。仅复制checkpoint确认前缀，崩溃多出的尾部留原件；完整未晋升checkpoint可只做本地GLB检查。
+1. 查 `modeling describe --operation resume_pre_submit --schema` 和 `--operation pre_submit_recovery_statement --schema`。
+2. 准备经调用方核实的恢复声明与一次性恢复授权，绑定原账当前 SHA256、原批准、原尝试、原请求和旧作业停止证据。若原账采用增量账本（`ledger_schema_version: "1.2"`），在恢复声明里显式填写 `"ledger_schema_version": "1.2"` 并附原派生批准与备份路径，只针对该账本里唯一新增的 `reserved` 行恢复。
+3. 运行 `resume_pre_submit`：工具沿用原账路径、原尝试和原额度，把 `reserved` 一次性转为 `submitting` 并保存旧账备份，随后上传同图并最多发出一次原生成请求。
+4. 受理后 `task_id` 先写入受理回执再更新原账。若写账过程出现宿主中断，查看报告里的 `pre_submit_recovery.accepted_task_id` 与回执文件，确认文件完整后转 `bind_unknown` 或 `query` 接着走。
 
-续传必须同HTTPS origin/path摘要、强ETag摘要、准确206/Content-Range及长度。无原生checkpoint、缺validator/长度、忽略Range、资源变更或坏SHA均拒绝，不猜拼接或自动全量重下。完整GLB校验、SHA和无覆盖晋升后才成功；签名URL仅内存，checkpoint只保摘要。单次socket阻塞可能延迟取消，不承诺即时中止、断电恢复或真实CDN续传已验。
+## 限流与海外接口边界
 
-## 限流与下载访问失败
-
-HTTP429给安全类别与有限延迟提示，不是重试许可；适配器不自动睡眠重试。收费POST429仍可能unknown，上传429保原预约，余额GET429在预约前停止。不换账或ID。中国站 query_batch每项单次GET，错误/限流/取消/超时停止；远端running/failed是快照，不等于整批生成通过。批量范围见[有界批量](bounded-batches.md)。
-
-模型HTTP401/403/404/410表示当前artifact不可用，不单凭状态认定删除或过期。旧job停止后，无残片可显式新download；有效双文件才按支持合同resume。内部重取同task URL，不额外循环query刷新。明确expired就停止刷新、查本地文件或核实保留政策，不据此释放预算。DNS/TLS/API403和下载失败分开诊断。
-
-安全HTTP诊断只保状态、白名单数值业务码、固定连接类别及可选request_id摘要，不输出远端message/body/token/URL。反复失败缩小诊断或报告缺口；批准CAS异常按[同账批准恢复定位](provider-and-budget.md#同账追加后处理批准)向前核对，绝不恢复旧财务快照。
+- **HTTP 429 限流（退出码 `12`）**：CLI 返回 `RATE_LIMITED` 以及频率码（`1007`）、并发码（`2000`）和有效退避秒数（`0..86400`）。按提示等待后再发起新查询；遇到余额查询或上传阶段 429 保持原预约待命，遇到收费 POST 429 保留 `unknown` 先核实再决定。
+- **海外接口（`tripo-overseas`）**：使用独立海外账本、批准和凭据范围，走 `query` 查询已知任务状态，用新 `download` 作业重新获取完整新鲜 GLB；遇到上传失败、未知提交或费用字段缺失时保留原预约和脱敏回执，核实清楚再处理。
+- **安全诊断日志**：HTTP 诊断字段只保留状态码、数值业务码、连接类别和可选 `request_id` 摘要，把令牌和签名链接隔离在内存里，交接和汇报时直接引用脱敏报告路径。

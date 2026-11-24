@@ -14,10 +14,7 @@ ADDON = ('LICENSE','README.md','blender_manifest.toml','__init__.py','contract.p
          'providers/registry.py','providers/tripo_cn.py','providers/pre_submit_recovery.py',
          'providers/transport_diagnostics.py','providers/image_upload.py','providers/outstanding_increment.py',
          'providers/overseas_contract.py','providers/overseas_budget.py','providers/tripo_overseas.py')
-SKILL = ('LICENSE','SKILL.md','references/blender-handoff.md','references/bounded-batches.md',
-         'references/brief-and-reference.md','references/delivery-and-review.md',
-         'references/generate-and-compare.md','references/material-cooperation.md',
-         'references/parts-and-completion.md','references/provider-and-budget.md','references/recovery.md')
+SKILL = ('LICENSE', 'SKILL.md', 'agents/openai.yaml', 'references/api-generation.md', 'references/blender-handoff.md', 'references/parts-and-handoff.md', 'references/recovery.md', 'references/sources.md')
 CLI = ('cli.py','protocol.py','runner.py','worker.py','modeling_identity.py','filesystem.py','processes.py',
        'bootstrap.py','timing.py','modeling_interface.py','modeling_workflow_contract.py',
        'modeling_host.py','modeling_workflow.py','modeling_verifier.py')
