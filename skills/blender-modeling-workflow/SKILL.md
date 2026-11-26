@@ -55,7 +55,7 @@ $ctl = './blenderctl.ps1'
 
 对比多个候选时，锁定同一套机位、构图、灯光、渲染引擎和色彩管理。按正背、四分之三和脸手接合局部对照参考单，画面优劣一眼分清。
 
-- **几何与贴图分开看**：先看白模轮廓、比例和遮挡，再看带贴图画面。贴图容易遮住发软的轮廓和粘连结构。
+- **几何与贴图分开看**：先看白模轮廓、比例和遮挡，再看带贴图画面。贴图容易遮住发软的轮廓和粘连结构。优先用 `blenderctl.ps1 preview $candidate --compare-modes solid,solid_wire,matcap,face_orientation --view front_3q` 或 `--mode solid_wire --layout quad` 快检。
 - **跑一次只读几何体检**：核对单位、尺寸、轴向（常见生成件正面朝 `+X`、高度约 `1.0 m`；整理交付白模时统一旋正为正面朝 `-Y`、底面落零并应用缩放，对齐商业审核 G2）、UV 层、材质槽和打包贴图状态。
 
 ```powershell

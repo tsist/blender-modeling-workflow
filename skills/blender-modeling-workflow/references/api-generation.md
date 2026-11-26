@@ -32,7 +32,8 @@ $ctl = './blenderctl.ps1'
 云端生成坚持先定白模再做精贴，避免轮廓没过关却多花贴图积分：
 
 1. **阶段一（白模定型）**：`h31_image`、`h31_multiview`、`h31_parts_multiview` 和 `p2_multiview` 底层固定发 `texture=false, pbr=false`。生成下载后先导进 Blender 摆同机位看大形、比例和遮挡。
-2. **阶段二（达标后精贴）**：白模过关且获得同账批准追加后，再对同一账本内已成功结算的原生成父任务调用 `texture_v35`（`detailed`、`pbr=true`、`bake=true`、`delight=true`），自动去掉原参考里的硬阴影。
+2. **阶段二（达标后精贴）**：白模过关且获得同账批准追加后，再对同一账本内已成功结算的原生成父任务调用 `texture_v35`（`v3.5-20260815`，已于 2026-11 成为 Tripo OpenAPI v3 默认贴图模型；`detailed`、`pbr=true`、`bake=true`、`delight=true`），自动去掉原参考里的硬阴影。
+3. **关于 H3.5 新模型（`v3.5-20261108`）**：Tripo OpenAPI v3 公开文档截至当前实测最新仍为 H3.1（`v3.1-20260211`）与 P2（`P2-20260801`），暂未开放 H3.5 API 操作；需直接使用 **Tripo H3.5 Preview（`v3.5-20261108`）** 时，改走 [tripo-studio-opencli](https://github.com/tsist/tripo-studio-opencli/blob/main/skills/tripo-studio-opencli/SKILL.md) 网页流程（国际站默认启用 H3.5，国内站待推送后无缝切换）。
 
 ### 中国站（`tripo-cn`）常用操作与成本口径
 
